@@ -1,0 +1,11 @@
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "centos/7"
+  config.vm.network "private_network", ip: "192.168.100.11"
+  config.vm.provider "virtualbox" do |vb|
+       vb.memory = "1024"
+	   vb.cpus = 1
+  config.vm.synced_folder ".", "/vagrant", type: "virtualbox"
+  #config.vm.provision "shell", inline: %Q(/usr/bin/env VAR=1 bash /vagrant/post_config.sh)  
+  end
+end
