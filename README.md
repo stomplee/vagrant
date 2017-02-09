@@ -8,13 +8,9 @@
 6. Vagrant has a bug that makes it run the inline scripts multiple times.  The framework below works around this bug.
 <code>
 #!/bin/bash
-
 if [ ! -f ~/runonce ]
 then
-	
 	<insert code here ie mkdir /git>
-	
-	
 	touch ~/runonce
 fi	
 </code>
