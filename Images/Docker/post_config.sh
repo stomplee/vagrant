@@ -7,4 +7,6 @@ add-apt-repository    "deb [arch=amd64] https://download.docker.com/linux/ubuntu
    stable"
 apt-get update
 apt-get install docker-ce -y
+gpasswd -a ubuntu docker
+service docker restart
 docker run hello-world
