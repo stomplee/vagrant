@@ -41,7 +41,7 @@ mv "$WORKDIR"/cfssljson_linux-amd64 /usr/local/bin/cfssljson
 # Verify CFSSL is working
 echo "Verify CFSSL is working..."
 cfssl version
-echo "Should see something like Version
+echo "Should see something like Version: 1.2.0 if CFSSL is working correctly."
 
 # Create SSL certificate authority config file
 cat  << 'EOF' > "$WORKDIR"/ca-config.json
@@ -60,4 +60,4 @@ cat  << 'EOF' > "$WORKDIR"/ca-config.json
 }
 EOF
 
-echo "" > "$WORKDIR"/install_k8stools-output.txt
+echo "install_k8stools.sh has already been run from this location." > "$WORKDIR"/install_k8stools-output.txt
