@@ -2,7 +2,10 @@
  
 if [ ! -f ~/runonce ]
 then
- 
+
+  # Suppress interactive menus while updating system
+  export DEBIAN_FRONTEND=noninteractive
+
   # Update the system
   apt-get update && apt-get upgrade -y
 
