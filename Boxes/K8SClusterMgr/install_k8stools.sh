@@ -18,7 +18,7 @@ apt-get update && apt-get upgrade -y
 echo "System has been upgraded.  Continuing..."
 
 # Download kubectl
-echo "Installing kubectl"
+echo "Installing kubectl.."
 cd "$WORKDIR"
 curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
 
@@ -33,8 +33,8 @@ echo "You should see a kubectl version output above.  If not kubectl did not ins
 
 echo "Downloading and installing CFSSL..."
 # Download CFSSL (CloudFlare's PKI Toolkit) to handle PKI
-wget --https-only https://pkg.cfssl.org/R1.2/cfssl_linux-amd64 -O "$WORKDIR"/cfssl_linux-amd64
-wget --https-only https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64 -O "$WORKDIR"/cfssljson_linux-amd64
+wget -q --https-only https://pkg.cfssl.org/R1.2/cfssl_linux-amd64 -O "$WORKDIR"/cfssl_linux-amd64
+wget -q --https-only https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64 -O "$WORKDIR"/cfssljson_linux-amd64
 
 # Mark the scripts as executable
 chmod +x "$WORKDIR"/cfssl_linux-amd64 "$WORKDIR"/cfssljson_linux-amd64
@@ -48,7 +48,9 @@ echo "Verifying that CFSSL is working..."
 cfssl version
 echo "You should see a cfssl version output above.  If not then CFSSL did not install correctly."
 
+
 # Create SSL certificate authority config file
+echo "Creating SSL CA config file..."
 cat  << 'EOF' > "$WORKDIR"/ca-config.json
 {
   "signing": {
@@ -66,6 +68,7 @@ cat  << 'EOF' > "$WORKDIR"/ca-config.json
 EOF
 
 # Create SSL CSR
+echo "Creating SSL CSR..."
 cat  << 'EOF' > "$WORKDIR"/ca-csr.json
 {
   "CN": "Kubernetes",
@@ -90,6 +93,9 @@ echo "Generating CA certificate and private key..."
 cfssl gencert -initca "$WORKDIR"/ca-csr.json | cfssljson -bare ca
 ls "$WORKDIR"
 echo "If the CA certificate and private key were created successfully, you should see ca.pem and ca-key.pem in the output above."
+
+# Make sure the ubuntu user owns the required files
+chown -R ubuntu:ubuntu /home/ubuntu/
 
 # Ensure the script has only been run once on this host
 echo "install_k8stools.sh has already been run from this location." > "$WORKDIR"/install_k8stools-output.txt
