@@ -49,7 +49,7 @@ cfssl version
 echo "You should see a cfssl version output above.  If not then CFSSL did not install correctly."
 
 
-# Create SSL certificate authority config file
+# Create SSL CA config file
 echo "Creating SSL CA config file..."
 cat  << 'EOF' > "$WORKDIR"/ca-config.json
 {
@@ -67,8 +67,8 @@ cat  << 'EOF' > "$WORKDIR"/ca-config.json
 }
 EOF
 
-# Create SSL CSR
-echo "Creating SSL CSR..."
+# Create SSL CA CSR
+echo "Creating SSL CA CSR..."
 cat  << 'EOF' > "$WORKDIR"/ca-csr.json
 {
   "CN": "Kubernetes",
@@ -88,14 +88,48 @@ cat  << 'EOF' > "$WORKDIR"/ca-csr.json
 }
 EOF
 
-# Generate SSL certificates
-echo "Generating CA certificate and private key..."
+# Generate SSL CA certificate and private key
+echo "Generating SSL CA certificate and private key..."
 cfssl gencert -initca "$WORKDIR"/ca-csr.json | cfssljson -bare ca
-ls "$WORKDIR"
-echo "If the CA certificate and private key were created successfully, you should see ca.pem and ca-key.pem in the output above."
+
+# Create SSL CSR for Kubernetes admin user
+echo "Creating SSL CSR for the Kubernetes admin user..."
+cat  << 'EOF' > "$WORKDIR"/admin-csr.json
+{
+  "CN": "admin",
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "US",
+      "L": "Portland",
+      "O": "system:masters",
+      "OU": "Kubernetes The Hard Way",
+      "ST": "Oregon"
+    }
+  ]
+}
+EOF
+
+# Generate SSL certificate and private key for the Kubernetes admin user
+echo "Generating SSL certificate and private key for the Kubernetes admin user..."
+cfssl gencert \
+  -ca="$WORKDIR"/ca.pem \
+  -ca-key="$WORKDIR"/ca-key.pem \
+  -config="$WORKDIR"/ca-config.json \
+  -profile=kubernetes \
+  "$WORKDIR"/admin-csr.json | cfssljson -bare admin
 
 # Make sure the ubuntu user owns the required files
 chown -R ubuntu:ubuntu /home/ubuntu/
+
+# Install AWS CLI
+apt-get install python python-pip -y
+pip install --upgrade pip
+pip install --upgrade awscli
+echo "AWS CLI has been installed.  You need to run aws configure on the machine to configure the AWS CLI."
 
 # Ensure the script has only been run once on this host
 echo "install_k8stools.sh has already been run from this location." > "$WORKDIR"/install_k8stools-output.txt
